@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Quintara | Patient-Controlled Medical Records</title>
   <style>
-    /* Simple modern styling */
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f4f6f9;
@@ -13,6 +12,7 @@
       margin: 0;
       padding: 0;
       line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
     }
     .container {
       max-width: 1000px;
@@ -26,6 +26,7 @@
     h1 {
       color: #3498db;
       font-size: 2.5em;
+      margin: 0;
     }
     .tagline {
       color: #7f8c8d;
@@ -38,6 +39,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding: 25px;
       margin-bottom: 30px;
+      transition: background-color 0.3s;
     }
     button {
       background: #3498db;
@@ -54,12 +56,21 @@
     }
     .hash {
       font-family: monospace;
-      background: #eee;
       padding: 8px 12px;
       border-radius: 6px;
       display: inline-block;
       font-size: 0.9em;
       margin-top: 5px;
+      background: #eee;
+      color: #333;
+    }
+    .verify-btn {
+      font-size: 0.8em;
+      margin-left: 10px;
+      background: #27ae60;
+    }
+    .verify-btn:hover {
+      background: #219653;
     }
     .access-list {
       list-style: none;
@@ -77,68 +88,173 @@
       color: #95a5a6;
       font-size: 0.9em;
     }
+
+    /* Dark mode */
+    body.dark-mode {
+      background: #121212;
+      color: #eee;
+    }
+    body.dark-mode .card {
+      background: #2a2a2a;
+      color: #eee;
+    }
+    body.dark-mode .access-list li {
+      border-bottom-color: #444;
+    }
+    body.dark-mode h1 {
+      color: #5dade2;
+    }
+    body.dark-mode .tagline,
+    body.dark-mode footer {
+      color: #bdc3c7;
+    }
+    body.dark-mode .hash {
+      background: #3a3a3a;
+      color: #d1d1d1;
+      border: 1px solid #555;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .modal.dark-mode .modal-content {
+      background: #2a2a2a;
+      color: #eee;
+    }
+    .modal h2 {
+      margin-top: 0;
+      color: #3498db;
+    }
+    .modal input, .modal button {
+      margin: 10px 0;
+      width: 100%;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: #000;
+    }
+    .dark-mode .close {
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Dark Mode Toggle -->
+  <button id="darkModeToggle" style="position:fixed;top:20px;right:20px;z-index:999;background:#333;color:white;padding:8px 12px;border:none;border-radius:6px;font-size:0.9em;">🌓 Dark Mode</button>
 
   <div class="container">
     <header>
       <h1>Quintara</h1>
       <p class="tagline">Your Medical Records, Secured by Blockchain</p>
-      <p>Connect Wallet to Continue</p>
-      <button onclick="alert('Wallet Connected! (Simulated)')">Connect MetaMask</button>
+      <p id="walletStatus">Connect Wallet to Continue</p>
+      <button id="connectWalletBtn">Connect MetaMask</button>
     </header>
 
     <!-- Patient View -->
-    <div class="card">
+    <div class="card" id="recordsSection" style="display:none;">
       <h2>📄 Your Medical Records</h2>
-      <p><strong>John Doe</strong> • Last login: Today</p>
+      <p><strong id="patientName">John Doe</strong> • Last login: Today</p>
 
       <h3>Record History (Stored on Blockchain)</h3>
-      <ul>
-        <li><strong>Vaccination Record</strong> – Apr 1, 2025 – <span class="hash">a1b2c3deehysbkrt78f9e0</span></li>
-        <li><strong>Blood Test Results</strong> – Mar 15, 2025 – <span class="hash">f9e8d7csdgjtivsmg4b3a2</span></li>
-        <li><strong>Doctor Visit Summary</strong> – Feb 10, 2025 – <span class="hash">e5f6g7hgurwngjds1i2o3</span></li>
+      <ul id="recordList">
+        <li>
+          <strong>Vaccination Record</strong> – Apr 1, 2025 – 
+          <span class="hash">a1b2c3deehysbkrt78f9e0</span>
+          <button class="verify-btn">🔍 Verify</button>
+        </li>
+        <li>
+          <strong>Blood Test Results</strong> – Mar 15, 2025 – 
+          <span class="hash">f9e8d7csdgjtivsmg4b3a2</span>
+          <button class="verify-btn">🔍 Verify</button>
+        </li>
       </ul>
     </div>
 
     <!-- Access Control -->
-    <div class="card">
+    <div class="card" id="accessSection" style="display:none;">
       <h2>🔐 Access Permissions</h2>
       <p>Control who can view your records.</p>
-      <ul class="access-list">
-        <li>
+      <ul class="access-list" id="accessList">
+        <li data-provider="St. Mary's Hospital">
           <span>St. Mary's Hospital</span>
-          <button onclick="alert('Access revoked from St. Mary\'s Hospital')">Revoke</button>
+          <button class="revokeBtn">Revoke</button>
         </li>
-        <li>
+        <li data-provider="Dr. Alice Johnson (Cardiologist)">
           <span>Dr. Alice Johnson (Cardiologist)</span>
-          <button onclick="alert('Access revoked')">Revoke</button>
-        </li>
-        <li>
-          <span>Mayo Clinic Research (Expires: 2026)</span>
-          <button onclick="alert('Access revoked')">Revoke</button>
+          <button class="revokeBtn">Revoke</button>
         </li>
       </ul>
-      <button onclick="alert('New access request sent')">+ Grant New Access</button>
+      <button id="grantAccessBtn">+ Grant New Access</button>
     </div>
 
-    <!-- Doctor View (Fake Toggle) -->
-    <div class="card">
+    <!-- Doctor View -->
+    <div class="card" id="uploadSection" style="display:none;">
       <h2>⚕️ Provider Upload</h2>
       <p>Add new record for patient</p>
-      <input type="file" disabled style="opacity:0.6" title="Fake upload - only for show" /><br/>
-      <button onclick="alert('Record uploaded & hash stored on blockchain!')" style="margin-top:10px;">
-        Upload & Seal Record
-      </button>
+      <input type="file" id="fileUpload" /><br/>
+      <button id="uploadBtn">Upload & Seal Record</button>
       <p><small>✅ Hash generated and stored immutably on blockchain</small></p>
     </div>
 
     <footer>
-      <p>MediChain Demo – A Decentralized EMR System </p>
+      <p><strong>Quintara</strong> – A Decentralized EMR System</p>
       <p>Uses blockchain to secure medical data — patients stay in control.</p>
     </footer>
   </div>
 
+  <!-- Connect Wallet Modal -->
+  <div id="connectModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Connect Your Wallet</h2>
+      <input type="text" id="walletAddress" placeholder="Enter wallet address (e.g. 0x...)" />
+      <input type="text" id="patientNameInput" placeholder="Enter your name" />
+      <button id="submitWallet">Connect</button>
+    </div>
+  </div>
+
+  <!-- Grant Access Modal -->
+  <div id="grantModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Grant Access</h2>
+      <input type="text" id="providerName" placeholder="Provider name (e.g. Dr. Smith)" />
+      <select id="accessDuration">
+        <option value="7">7 days</option>
+        <option value="30">30 days</option>
+        <option value="365">1 year</option>
+        <option value="0">Permanent</option>
+      </select>
+      <button id="submitGrant">Grant Access</button>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script src="script.js"></script>
 </body>
 </html>
