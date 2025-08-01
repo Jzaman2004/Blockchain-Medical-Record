@@ -221,6 +221,26 @@
       <p><small>✅ Hash generated and stored immutably on blockchain</small></p>
     </div>
 
+    <!-- Telemedicine Appointment -->
+    <div class="card" id="telemedSection" style="display:none;">
+      <h2>🩺 Schedule Telemedicine Visit</h2>
+      <p>Request a virtual consultation with an authorized provider</p>
+      <select id="providerSelect">
+        <!-- Dynamically populated -->
+      </select><br/>
+      <input type="datetime-local" id="appointmentTime" /><br/>
+      <button id="requestAppointment">Request Appointment</button>
+      <p><small>✅ Appointment request will be logged on blockchain</small></p>
+
+      <h3>📅 Appointment History</h3>
+      <ul id="appointmentList">
+        <li>
+          <span>Dr. Alice Johnson • May 5, 2025, 10:00 AM • <strong>Completed</strong></span>
+          <button class="verify-btn">🔍 Verify</button>
+        </li>
+      </ul>
+    </div>
+
     <footer>
       <p><strong>Quintara</strong> – A Decentralized EMR System</p>
       <p>Uses blockchain to secure medical data — patients stay in control.</p>
@@ -251,6 +271,18 @@
         <option value="0">Permanent</option>
       </select>
       <button id="submitGrant">Grant Access</button>
+    </div>
+  </div>
+
+  <!-- Appointment Confirmation Modal -->
+  <div id="appointmentModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Appointment Requested</h2>
+      <p id="appointmentDetails"></p>
+      <p><strong>Status:</strong> Pending provider confirmation</p>
+      <p><small>✅ This request has been recorded on the blockchain for auditability.</small></p>
+      <button id="confirmAppointmentBtn">Close</button>
     </div>
   </div>
 
